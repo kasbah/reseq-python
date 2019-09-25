@@ -31,48 +31,20 @@ def send(interface, cmd, receive_interface=None):
         ret += receive_interface.readline().rstrip() + b"\n"
     return ret.decode('utf8')
 
-#res = send(fpga_out, "RESET\n", fpga_in)
-#print(res)
-#
-#res = send(fpga_out, "LSEN\nSWLSRSHUT 1\nZDACW 32000\nT1HM\nT2HM\nT3HM\n", fpga_in)
-#print(res)
-#
-#res = send(y_motor, "1V0\r15\r")
-#print(res)
-#
-#res = send(fpga_out, "SWLSRSHUT 0\n", fpga_in)
-#print(res)
-#
-#res = send(fpga_out, "TDIYPOS 2144260\n", fpga_in)
-#print(res)
-#
-#res = send(y_motor, "1D-4015740\r1G\r")
-#print(res)
-#time.sleep(1)
-#
-#res = send(fpga_out, "TDIYPOS 2238750\n", fpga_in)
-#print(res)
-#
-#res = send(y_motor, "1D-3921250\r1G\r")
-#print(res)
-#time.sleep(1)
-#
-#res = send(fpga_out, "TDIYPOS 2333230\n", fpga_in)
-#print(res)
-#
-#res = send(y_motor, "1D-3826770\r1G\r")
-#print(res)
-#time.sleep(1)
-#
-#res = send(fpga_out, "TDIYPOS 2427720\n", fpga_in)
-#print(res)
-
-res = send(y_motor, "1D-4511650\r1G\r")
+res = send(y_motor, "1G\r")
 print(res)
 
-time.sleep(10)
+time.sleep(2)
 
-res = send(fpga_out, "TDIYPOS 1388350\n", fpga_in)
+res = send(y_motor, "1D\r")
+print(res)
+y_motor_pos = int(res.split('*')[1])
+
+res = send(fpga_out, "TDIYERD\n", fpga_in)
+print(res)
+encoder_pos = int(res.split(' ')[1])
+
+res = send(fpga_out, "TDIYPOS {}\n".format(encoder_pos - 100000), fpga_in)
 print(res)
 
 
@@ -84,10 +56,15 @@ send(fpga_out, "TDIYWAIT\n")
 time.sleep(1)
 
 
-res = send(y_motor, "1D-4931650\r1G\r")
+res = send(y_motor, "1D{}\r1G\r".format(y_motor_pos - 420000))
+print(res)
+time.sleep(10)
+
+res = send(fpga_out, "TDIYERD\n", fpga_in)
 print(res)
 
-#time.sleep(5)
-#
-#res = send(y_motor, "1D-4039210\r1G\r")
-#print(res)
+res = send(y_motor, "1D{}\r1G\r".format(y_motor_pos))
+print(res)
+
+res = send(fpga_out, "TDIYERD\n", fpga_in)
+print(res)
